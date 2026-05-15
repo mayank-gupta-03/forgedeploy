@@ -1,17 +1,17 @@
 services:
   db:
     image: postgres:latest
-    container_name: forgedeploy-db
+    container_name: forge-deploy-db
     environment:
-      POSTGRES_DB: forgedeploy-service
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: qwertyuiop
+      POSTGRES_DB: forge-deploy-service
+      POSTGRES_USER: forge_user
+      POSTGRES_PASSWORD: forge_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U forge_user -d forge-deploy-service"]
       interval: 10s
       timeout: 5s
       retries: 5

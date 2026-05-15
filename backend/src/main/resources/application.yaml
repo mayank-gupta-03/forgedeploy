@@ -3,9 +3,9 @@ spring:
     name: service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/forgedeploy-service
-    username: postgres
-    password: qwertyuiop
+    url: jdbc:postgresql://localhost:5432/forge-deploy-service
+    username: forge_user
+    password: forge_password
 
   jpa:
     hibernate:
