@@ -1,7 +1,6 @@
 package com.forgedeploy.service.modules.auth.service;
 
 import com.forgedeploy.service.common.exception.EmailAlreadyExistsException;
-import com.forgedeploy.service.common.exception.InvalidCredentialsException;
 import com.forgedeploy.service.entities.UserInfo;
 import com.forgedeploy.service.modules.auth.dto.LoginRequest;
 import com.forgedeploy.service.modules.auth.dto.LoginResponse;
@@ -12,7 +11,6 @@ import com.forgedeploy.service.security.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,13 +40,9 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
+        authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-
-        if (!authentication.isAuthenticated()) {
-            throw new InvalidCredentialsException("Invalid credentials! Please login again!");
-        }
 
         String token = jwtService.generateToken(request.getEmail());
 
