@@ -1,5 +1,7 @@
 package com.forgedeploy.service.modules.auth.controller;
 
+import com.forgedeploy.service.modules.auth.dto.LoginRequest;
+import com.forgedeploy.service.modules.auth.dto.LoginResponse;
 import com.forgedeploy.service.modules.auth.dto.RegisterUserRequest;
 import com.forgedeploy.service.modules.auth.dto.RegisterUserResponse;
 import com.forgedeploy.service.modules.auth.service.AuthService;
@@ -21,6 +23,11 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<RegisterUserResponse> registerUser(@Valid @RequestBody RegisterUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerUser(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 
 }

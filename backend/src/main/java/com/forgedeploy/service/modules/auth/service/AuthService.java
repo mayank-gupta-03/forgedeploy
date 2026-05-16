@@ -1,11 +1,18 @@
 package com.forgedeploy.service.modules.auth.service;
 
 import com.forgedeploy.service.common.exception.EmailAlreadyExistsException;
+import com.forgedeploy.service.common.exception.InvalidCredentialsException;
 import com.forgedeploy.service.entities.UserInfo;
+import com.forgedeploy.service.modules.auth.dto.LoginRequest;
+import com.forgedeploy.service.modules.auth.dto.LoginResponse;
 import com.forgedeploy.service.modules.auth.dto.RegisterUserRequest;
 import com.forgedeploy.service.modules.auth.dto.RegisterUserResponse;
 import com.forgedeploy.service.modules.users.repositories.UserRepository;
+import com.forgedeploy.service.security.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +21,8 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     public RegisterUserResponse registerUser(RegisterUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -29,6 +38,23 @@ public class AuthService {
 
         return RegisterUserResponse.builder()
                 .email(userInfo.getEmail())
+                .build();
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
+
+        if (!authentication.isAuthenticated()) {
+            throw new InvalidCredentialsException("Invalid credentials! Please login again!");
+        }
+
+        String token = jwtService.generateToken(request.getEmail());
+
+        return LoginResponse.builder()
+                .token(token)
+                .email(request.getEmail())
                 .build();
     }
 }
