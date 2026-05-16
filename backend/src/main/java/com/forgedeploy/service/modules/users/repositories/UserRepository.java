@@ -1,4 +1,4 @@
-package com.forgedeploy.service.repositories;
+package com.forgedeploy.service.modules.users.repositories;
 
 import com.forgedeploy.service.entities.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
