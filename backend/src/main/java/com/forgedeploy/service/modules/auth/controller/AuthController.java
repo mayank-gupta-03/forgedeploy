@@ -3,6 +3,7 @@ package com.forgedeploy.service.modules.auth.controller;
 import com.forgedeploy.service.modules.auth.dto.RegisterUserRequest;
 import com.forgedeploy.service.modules.auth.dto.RegisterUserResponse;
 import com.forgedeploy.service.modules.auth.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterUserResponse> registerUser(@RequestBody RegisterUserRequest request) {
+    public ResponseEntity<RegisterUserResponse> registerUser(@Valid @RequestBody RegisterUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerUser(request));
     }
 
