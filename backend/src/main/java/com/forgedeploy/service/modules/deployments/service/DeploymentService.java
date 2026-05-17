@@ -27,9 +27,9 @@ public class DeploymentService {
 
     private static final String UPLOADS_DIR = "uploads";
 
-    public DeploymentResponse createDeployment(CreateDeploymentRequest request, MultipartFile file, String userEmail) {
+    public DeploymentResponse createDeployment(CreateDeploymentRequest request, MultipartFile file, UUID userId) {
         Project project = projectRepository.findById(request.getProjectId())
-                .filter(p -> p.getUser().getEmail().equals(userEmail))
+                .filter(p -> p.getUser().getId().equals(userId))
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found or access denied"));
 
         Deployment deployment = Deployment.builder()
@@ -57,9 +57,9 @@ public class DeploymentService {
         return mapToResponse(deployment);
     }
 
-    public DeploymentResponse getDeploymentById(UUID id, String userEmail) {
+    public DeploymentResponse getDeploymentById(UUID id, UUID userId) {
         Deployment deployment = deploymentRepository.findById(id)
-                .filter(d -> d.getProject().getUser().getEmail().equals(userEmail))
+                .filter(d -> d.getProject().getUser().getId().equals(userId))
                 .orElseThrow(() -> new ProjectNotFoundException("Deployment not found or access denied"));
 
         return mapToResponse(deployment);

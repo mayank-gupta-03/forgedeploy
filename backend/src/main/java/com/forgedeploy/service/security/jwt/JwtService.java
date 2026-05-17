@@ -12,6 +12,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -19,8 +20,9 @@ public class JwtService {
     @Value("${jwt.secret}")
     public String JWT_SECRET;
 
-    public String generateToken(String email) {
+    public String generateToken(String email, UUID userId) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId.toString());
         return createToken(claims, email);
     }
 
@@ -30,7 +32,7 @@ public class JwtService {
                 .claims(claims)
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
                 .signWith(getSignKey(), Jwts.SIG.HS256)
                 .compact();
     }
@@ -42,6 +44,11 @@ public class JwtService {
 
     public String extractUsername(String token) {
         return extractClaims(token, Claims::getSubject);
+    }
+
+    public UUID extractUserId(String token) {
+        String userIdStr = extractClaims(token, claims -> claims.get("userId", String.class));
+        return UUID.fromString(userIdStr);
     }
 
     public Date extractExpiration(String token) {

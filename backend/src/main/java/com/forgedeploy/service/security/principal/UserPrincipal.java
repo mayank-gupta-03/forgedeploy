@@ -14,6 +14,10 @@ public class UserPrincipal implements UserDetails {
 
     private final UserInfo userInfo;
 
+    public java.util.UUID getId() {
+        return userInfo.getId();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));

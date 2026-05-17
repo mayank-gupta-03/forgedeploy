@@ -21,9 +21,9 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
 
-    public ProjectResponse createProject(CreateProjectRequest request, String email) {
-        UserInfo user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    public ProjectResponse createProject(CreateProjectRequest request, UUID userId) {
+        UserInfo user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
 
         Project project = Project.builder()
                 .name(request.getName())
@@ -35,22 +35,16 @@ public class ProjectService {
         return mapToResponse(project);
     }
 
-    public List<ProjectResponse> getProjects(String email) {
-        UserInfo user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-
-        return projectRepository.findAllByUserId(user.getId())
+    public List<ProjectResponse> getProjects(UUID userId) {
+        return projectRepository.findAllByUserId(userId)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    public ProjectResponse getProjectById(UUID id, String email) {
-        UserInfo user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-
+    public ProjectResponse getProjectById(UUID id, UUID userId) {
         Project project = projectRepository.findById(id)
-                .filter(p -> p.getUser().getId().equals(user.getId()))
+                .filter(p -> p.getUser().getId().equals(userId))
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found or access denied"));
 
         return mapToResponse(project);
