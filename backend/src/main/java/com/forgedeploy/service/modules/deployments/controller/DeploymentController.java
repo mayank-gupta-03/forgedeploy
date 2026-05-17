@@ -15,7 +15,7 @@ import java.security.Principal;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/deployments")
+@RequestMapping("/api/v1/deployments")
 @RequiredArgsConstructor
 public class DeploymentController {
     private final DeploymentService deploymentService;
