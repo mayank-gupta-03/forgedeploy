@@ -2,6 +2,7 @@ package com.forgedeploy.service.modules.deployments.service;
 
 import com.forgedeploy.service.common.exception.ProjectNotFoundException;
 import com.forgedeploy.service.entities.Deployment;
+import com.forgedeploy.service.entities.DeploymentStatus;
 import com.forgedeploy.service.entities.Project;
 import com.forgedeploy.service.modules.deployments.dto.CreateDeploymentRequest;
 import com.forgedeploy.service.modules.deployments.dto.DeploymentResponse;
@@ -38,7 +39,7 @@ public class DeploymentService {
                 .repoUrl(request.getRepoUrl())
                 .buildCommand(request.getBuildCommand() != null ? request.getBuildCommand() : "npm run build")
                 .outputDirectory(request.getOutputDirectory() != null ? request.getOutputDirectory() : "dist")
-                .status("QUEUED")
+                .status(DeploymentStatus.QUEUED)
                 .build();
 
         if ("ZIP".equalsIgnoreCase(request.getSourceType())) {
@@ -84,7 +85,7 @@ public class DeploymentService {
                 .projectId(deployment.getProject().getId())
                 .sourceType(deployment.getSourceType())
                 .repoUrl(deployment.getRepoUrl())
-                .status(deployment.getStatus())
+                .status(deployment.getStatus().name())
                 .createdAt(deployment.getCreatedAt())
                 .build();
     }
