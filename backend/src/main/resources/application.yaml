@@ -22,3 +22,11 @@ spring:
 
 jwt:
   secret: 048e51adcecaef206bdb0b11a8af5f7baef79cbf580dcf3030b8bbf33aa091b4
+
+storage:
+  s3:
+    bucket-name: forge-deploy-assets
+    endpoint: http://localhost:9000
+    access-key: admin
+    secret-key: password
+    region: us-east-1
