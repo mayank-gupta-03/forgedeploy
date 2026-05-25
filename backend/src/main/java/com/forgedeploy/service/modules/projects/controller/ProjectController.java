@@ -3,7 +3,7 @@ package com.forgedeploy.service.modules.projects.controller;
 import com.forgedeploy.service.modules.projects.dto.CreateProjectRequest;
 import com.forgedeploy.service.modules.projects.dto.ProjectResponse;
 import com.forgedeploy.service.modules.projects.service.ProjectService;
-import com.forgedeploy.service.security.principal.UserPrincipal;
+import com.forgedeploy.service.modules.security.principal.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

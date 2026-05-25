@@ -1,4 +1,4 @@
-package com.forgedeploy.service.security.jwt;
+package com.forgedeploy.service.modules.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

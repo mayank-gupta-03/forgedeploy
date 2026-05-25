@@ -1,4 +1,4 @@
-package com.forgedeploy.service.common.service;
+package com.forgedeploy.service.modules.s3.service;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

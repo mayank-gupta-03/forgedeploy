@@ -7,7 +7,7 @@ import com.forgedeploy.service.modules.auth.dto.LoginResponse;
 import com.forgedeploy.service.modules.auth.dto.RegisterUserRequest;
 import com.forgedeploy.service.modules.auth.dto.RegisterUserResponse;
 import com.forgedeploy.service.modules.users.repositories.UserRepository;
-import com.forgedeploy.service.security.jwt.JwtService;
+import com.forgedeploy.service.modules.security.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

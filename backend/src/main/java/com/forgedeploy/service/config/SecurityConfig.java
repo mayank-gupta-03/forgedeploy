@@ -1,6 +1,6 @@
 package com.forgedeploy.service.config;
 
-import com.forgedeploy.service.security.jwt.JwtAuthFilter;
+import com.forgedeploy.service.modules.security.jwt.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

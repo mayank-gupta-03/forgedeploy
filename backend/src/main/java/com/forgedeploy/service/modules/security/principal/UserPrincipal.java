@@ -1,4 +1,4 @@
-package com.forgedeploy.service.security.principal;
+package com.forgedeploy.service.modules.security.principal;
 
 import com.forgedeploy.service.entities.UserInfo;
 import lombok.RequiredArgsConstructor;

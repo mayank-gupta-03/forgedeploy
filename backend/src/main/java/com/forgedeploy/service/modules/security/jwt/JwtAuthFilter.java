@@ -1,4 +1,4 @@
-package com.forgedeploy.service.security.jwt;
+package com.forgedeploy.service.modules.security.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
