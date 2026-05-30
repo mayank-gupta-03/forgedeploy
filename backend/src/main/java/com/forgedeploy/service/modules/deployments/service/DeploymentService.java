@@ -8,6 +8,8 @@ import com.forgedeploy.service.modules.deployments.dto.CreateDeploymentRequest;
 import com.forgedeploy.service.modules.deployments.dto.DeploymentResponse;
 import com.forgedeploy.service.modules.deployments.repository.DeploymentRepository;
 import com.forgedeploy.service.modules.projects.repository.ProjectRepository;
+import com.forgedeploy.service.modules.s3.service.S3Service;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,9 +27,11 @@ import java.util.UUID;
 public class DeploymentService {
     private final DeploymentRepository deploymentRepository;
     private final ProjectRepository projectRepository;
+    private final S3Service s3Service;
 
     private static final String UPLOADS_DIR = "uploads";
 
+    @Transactional
     public DeploymentResponse createDeployment(CreateDeploymentRequest request, MultipartFile file, UUID userId) {
         Project project = projectRepository.findById(request.getProjectId())
                 .filter(p -> p.getUser().getId().equals(userId))
@@ -42,19 +46,27 @@ public class DeploymentService {
                 .status(DeploymentStatus.QUEUED)
                 .build();
 
+        deploymentRepository.save(deployment);
+
+        String key = "projects/" + project.getId() + "/deployments/" + deployment.getId() + "/source.zip";
+
         if ("ZIP".equalsIgnoreCase(request.getSourceType())) {
             if (file == null || file.isEmpty()) {
                 throw new IllegalArgumentException("ZIP file is required when source type is ZIP");
             }
             deployment.setRepoUrl("local-zip");
+
+            try {
+                uploadZipToS3(file, key);
+                deployment.setStorageKey(key);
+            } catch (IOException e) {
+                deployment.setStatus(DeploymentStatus.FAILED);
+                log.error("Deployment failed for project: {}, deployment: {}", project.getId(), deployment.getId(), e);
+                throw new RuntimeException("Failed to deploy the project", e);
+            }
         }
 
         deployment = deploymentRepository.save(deployment);
-
-        if ("ZIP".equalsIgnoreCase(request.getSourceType())) {
-            saveZipFile(deployment.getId(), file);
-        }
-
         return mapToResponse(deployment);
     }
 
@@ -66,17 +78,8 @@ public class DeploymentService {
         return mapToResponse(deployment);
     }
 
-    private void saveZipFile(UUID deploymentId, MultipartFile file) {
-        try {
-            Path root = Paths.get(UPLOADS_DIR);
-            if (!Files.exists(root)) {
-                Files.createDirectories(root);
-            }
-            Files.copy(file.getInputStream(), root.resolve(deploymentId + ".zip"));
-        } catch (IOException e) {
-            log.error("Could not save ZIP file for deployment: {}", deploymentId, e);
-            throw new RuntimeException("Failed to store deployment file", e);
-        }
+    private void uploadZipToS3(MultipartFile file, String key) throws IOException {
+        s3Service.uploadInputStream(key, file.getInputStream(), file.getSize(), file.getContentType());
     }
 
     private DeploymentResponse mapToResponse(Deployment deployment) {

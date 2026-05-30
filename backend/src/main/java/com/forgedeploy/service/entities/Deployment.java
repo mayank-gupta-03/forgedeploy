@@ -32,6 +32,9 @@ public class Deployment {
     @Column(name = "repo_url", nullable = false)
     private String repoUrl;
 
+    @Column(name = "storage_key")
+    private String storageKey;
+
     @Column(name = "build_command")
     private String buildCommand;
 
