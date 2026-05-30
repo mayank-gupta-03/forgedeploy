@@ -3,10 +3,14 @@ CREATE TABLE deployments (
     project_id UUID NOT NULL REFERENCES projects(id),
     source_type VARCHAR(50) NOT NULL,
     repo_url VARCHAR(255) NOT NULL,
+    storage_key VARCHAR(255),
     build_command VARCHAR(255),
     output_directory VARCHAR(255),
     status VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    log_path VARCHAR(255),
+    build_duration BIGINT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE deployment_jobs (
