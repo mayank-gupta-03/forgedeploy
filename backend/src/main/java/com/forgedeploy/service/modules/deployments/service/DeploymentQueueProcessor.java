@@ -35,7 +35,7 @@ public class DeploymentQueueProcessor {
         // Simple "locking" mechanism: move to CLONING status
         deployment.setStatus(DeploymentStatus.CLONING);
         deploymentRepository.save(deployment);
-        
+
         // Pass to async worker
         processDeploymentAsync(deployment);
     }
@@ -43,17 +43,17 @@ public class DeploymentQueueProcessor {
     @Async("deploymentTaskExecutor")
     public void processDeploymentAsync(Deployment deployment) {
         log.info("Async worker started for deployment: {}", deployment.getId());
-        
+
         try {
             // Mocking the build process for Phase 1
-            Thread.sleep(2000); 
-            
+            Thread.sleep(2000);
+
             log.info("Mock build finished for deployment: {}", deployment.getId());
-            
+
             // In Phase 2, this will be replaced with actual build/docker logic
             deployment.setStatus(DeploymentStatus.COMPLETED);
             deploymentRepository.save(deployment);
-            
+
         } catch (InterruptedException e) {
             log.error("Deployment interrupted: {}", deployment.getId(), e);
             deployment.setStatus(DeploymentStatus.FAILED);
