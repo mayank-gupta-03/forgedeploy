@@ -19,12 +19,13 @@ import java.util.stream.Stream;
 public class WorkspaceService {
     private static final String BASE_PATH = "/tmp/forgedeploy/workspaces/";
 
-    public void saveToWorkspace(UUID deploymentId, InputStream inputStream) {
+    public Path saveToWorkspace(UUID deploymentId, InputStream inputStream) {
         Path workspace = createWorkspace(deploymentId);
         Path targetFilePath = workspace.resolve("source.zip");
 
         try {
             Files.copy(inputStream, targetFilePath, StandardCopyOption.REPLACE_EXISTING);
+            return targetFilePath;
         } catch (IOException e) {
             log.error("Failed to save input stream to workspace for deployment: {}", deploymentId, e);
             throw new RuntimeException("Failed to store file in workspace", e);

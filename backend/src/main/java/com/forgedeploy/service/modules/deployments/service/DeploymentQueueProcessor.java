@@ -11,8 +11,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Service
@@ -52,7 +60,8 @@ public class DeploymentQueueProcessor {
         try {
             String key = deployment.getStorageKey();
             InputStream file = s3Service.downloadFile(key);
-            workspaceService.saveToWorkspace(deployment.getId(), file);
+            Path zipFilePath = workspaceService.saveToWorkspace(deployment.getId(), file);
+            extractZip(zipFilePath);
 
             log.info("Mock build finished for deployment: {}", deployment.getId());
 
@@ -67,7 +76,49 @@ public class DeploymentQueueProcessor {
         }
     }
 
-    private void extractZip(ZipInputStream inputStream) {
+    private void extractZip(Path zipFilePath) throws IOException {
+        Path targetDir = zipFilePath.getParent();
 
+        if (targetDir == null) {
+            throw new IOException("Invalid ZIP file destination workspace.");
+        }
+
+        cleanDirectoryExceptZip(targetDir, zipFilePath);
+
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFilePath.toFile()))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                Path newPath = targetDir.resolve(entry.getName()).normalize();
+
+                if (!newPath.startsWith(targetDir)) {
+                    throw new IOException("Bad zip entry" + entry.getName());
+                }
+
+                if (entry.isDirectory()) {
+                    Files.createDirectories(newPath);
+                } else {
+                    Files.createDirectories(newPath.getParent());
+                    Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+                zis.closeEntry();
+            }
+        }
+    }
+
+    private void cleanDirectoryExceptZip(Path targetDir, Path zipFilePath) {
+        try (Stream<Path> paths = Files.walk(targetDir)) {
+            List<Path> pathsToDelete = paths
+                    .sorted(Comparator.reverseOrder())
+                    .filter(path -> !path.equals(targetDir))
+                    .filter(path -> !path.equals(zipFilePath))
+                    .toList();
+
+            for (Path path : pathsToDelete) {
+                Files.deleteIfExists(path);
+            }
+        } catch (IOException e) {
+            log.error("Failed to clean the workspace for file path: {}", zipFilePath, e);
+            throw new RuntimeException("Unable to clean workspace", e);
+        }
     }
 }
