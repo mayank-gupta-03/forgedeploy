@@ -3,6 +3,7 @@ package com.forgedeploy.service.modules.deployments.service;
 import com.forgedeploy.service.entities.Deployment;
 import com.forgedeploy.service.entities.DeploymentStatus;
 import com.forgedeploy.service.modules.deployments.repository.DeploymentRepository;
+import com.forgedeploy.service.modules.s3.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -10,7 +11,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +21,8 @@ import java.util.List;
 public class DeploymentQueueProcessor {
 
     private final DeploymentRepository deploymentRepository;
+    private final S3Service s3Service;
+    private final WorkspaceService workspaceService;
 
     @Scheduled(fixedDelay = 5000)
     public void processQueue() {
@@ -45,8 +50,9 @@ public class DeploymentQueueProcessor {
         log.info("Async worker started for deployment: {}", deployment.getId());
 
         try {
-            // Mocking the build process for Phase 1
-            Thread.sleep(2000);
+            String key = deployment.getStorageKey();
+            InputStream file = s3Service.downloadFile(key);
+            workspaceService.saveToWorkspace(deployment.getId(), file);
 
             log.info("Mock build finished for deployment: {}", deployment.getId());
 
@@ -54,15 +60,14 @@ public class DeploymentQueueProcessor {
             deployment.setStatus(DeploymentStatus.COMPLETED);
             deploymentRepository.save(deployment);
 
-        } catch (InterruptedException e) {
-            log.error("Deployment interrupted: {}", deployment.getId(), e);
-            deployment.setStatus(DeploymentStatus.FAILED);
-            deploymentRepository.save(deployment);
-            Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.error("Deployment failed: {}", deployment.getId(), e);
             deployment.setStatus(DeploymentStatus.FAILED);
             deploymentRepository.save(deployment);
         }
+    }
+
+    private void extractZip(ZipInputStream inputStream) {
+
     }
 }
