@@ -3,6 +3,7 @@ package com.forgedeploy.service.modules.deployments.service;
 import com.forgedeploy.service.entities.Deployment;
 import com.forgedeploy.service.entities.DeploymentStatus;
 import com.forgedeploy.service.modules.deployments.repository.DeploymentRepository;
+import com.forgedeploy.service.modules.engine.service.WorkspaceService;
 import com.forgedeploy.service.modules.s3.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
