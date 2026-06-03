@@ -2,6 +2,7 @@ CREATE TABLE deployments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID NOT NULL REFERENCES projects(id),
     source_type VARCHAR(50) NOT NULL,
+    project_type VARCHAR(50) NOT NULL,
     repo_url VARCHAR(255) NOT NULL,
     storage_key VARCHAR(255),
     build_command VARCHAR(255),
