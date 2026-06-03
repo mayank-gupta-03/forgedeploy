@@ -1,5 +1,7 @@
 package com.forgedeploy.service.modules.deployments.dto;
 
+import com.forgedeploy.service.entities.SourceType;
+import com.forgedeploy.service.modules.engine.dto.enums.ProjectType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -17,8 +19,11 @@ public class CreateDeploymentRequest {
     @NotNull(message = "Project ID is required")
     private UUID projectId;
 
-    @NotBlank(message = "Source type is required")
-    private String sourceType; // 'GITHUB' or 'ZIP'
+    @NotNull(message = "Source type is required")
+    private SourceType sourceType;
+
+    @NotNull(message = "Project type is required")
+    private ProjectType projectType;
 
     private String repoUrl;
 

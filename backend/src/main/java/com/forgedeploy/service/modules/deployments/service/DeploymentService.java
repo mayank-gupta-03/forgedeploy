@@ -1,6 +1,7 @@
 package com.forgedeploy.service.modules.deployments.service;
 
 import com.forgedeploy.service.common.exception.ProjectNotFoundException;
+import com.forgedeploy.service.entities.SourceType;
 import com.forgedeploy.service.entities.Deployment;
 import com.forgedeploy.service.entities.DeploymentStatus;
 import com.forgedeploy.service.entities.Project;
@@ -40,9 +41,10 @@ public class DeploymentService {
         Deployment deployment = Deployment.builder()
                 .project(project)
                 .sourceType(request.getSourceType())
+                .projectType(request.getProjectType())
                 .repoUrl(request.getRepoUrl())
-                .buildCommand(request.getBuildCommand() != null ? request.getBuildCommand() : "npm run build")
-                .outputDirectory(request.getOutputDirectory() != null ? request.getOutputDirectory() : "dist")
+                .buildCommand(request.getBuildCommand() != null ? request.getBuildCommand() : null)
+                .outputDirectory(request.getOutputDirectory() != null ? request.getOutputDirectory() : null)
                 .status(DeploymentStatus.QUEUED)
                 .build();
 
@@ -50,7 +52,7 @@ public class DeploymentService {
 
         String key = "projects/" + project.getId() + "/deployments/" + deployment.getId() + "/source.zip";
 
-        if ("ZIP".equalsIgnoreCase(request.getSourceType())) {
+        if (SourceType.ZIP.equals(request.getSourceType())) {
             if (file == null || file.isEmpty()) {
                 throw new IllegalArgumentException("ZIP file is required when source type is ZIP");
             }
@@ -87,8 +89,9 @@ public class DeploymentService {
                 .id(deployment.getId())
                 .projectId(deployment.getProject().getId())
                 .sourceType(deployment.getSourceType())
+                .projectType(deployment.getProjectType())
                 .repoUrl(deployment.getRepoUrl())
-                .status(deployment.getStatus().name())
+                .status(deployment.getStatus())
                 .createdAt(deployment.getCreatedAt())
                 .build();
     }

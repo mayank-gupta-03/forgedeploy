@@ -1,5 +1,6 @@
 package com.forgedeploy.service.entities;
 
+import com.forgedeploy.service.modules.engine.dto.enums.ProjectType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,8 +27,13 @@ public class Deployment {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "source_type", nullable = false)
-    private String sourceType;
+    private SourceType sourceType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "project_type", nullable = false)
+    private ProjectType projectType;
 
     @Column(name = "repo_url", nullable = false)
     private String repoUrl;
