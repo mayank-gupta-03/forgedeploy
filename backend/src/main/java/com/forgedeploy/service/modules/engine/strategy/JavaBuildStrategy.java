@@ -17,6 +17,6 @@ public class JavaBuildStrategy implements BuildStrategy {
 
     @Override
     public String getDefaultBuildCommand() {
-        return "sh -c 'mvn clean package -DskipTests'";
+        return "mvn clean package -DskipTests";
     }
 }

@@ -18,6 +18,6 @@ public class NodeBuildStrategy implements BuildStrategy {
 
     @Override
     public String getDefaultBuildCommand() {
-        return "sh -c 'npm clean install && npm run build'";
+        return "npm clean install && npm run build";
     }
 }
