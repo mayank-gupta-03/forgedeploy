@@ -10,8 +10,12 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,9 @@ public class S3Service {
 
     @Value("${storage.s3.bucket-name}")
     private String bucketName;
+
+    private static final String SOURCE_KEY_PATTERN = "projects/%s/deployments/%s/source.zip";
+    private static final String ARTIFACTS_KEY_PATTERN = "projects/%s/deployments/%s/artifacts/";
 
     @PostConstruct
     public void init() {
@@ -69,6 +76,25 @@ public class S3Service {
         }
     }
 
+    public void uploadDirectory(String s3Prefix, Path sourceFolder) {
+        log.info("Recursively uploading directory {} to S3 prefix {}", sourceFolder, s3Prefix);
+        if (!Files.isDirectory(sourceFolder)) {
+            throw new IllegalArgumentException("Provided path is not a directory: " + sourceFolder);
+        }
+
+        try (Stream<Path> paths = Files.walk(sourceFolder)) {
+            paths.filter(Files::isRegularFile).forEach(path -> {
+                String relativePath = sourceFolder.relativize(path).toString();
+                // Construct S3 key: prefix + relative path
+                String s3Key = s3Prefix.endsWith("/") ? s3Prefix + relativePath : s3Prefix + "/" + relativePath;
+                uploadFile(s3Key, path);
+            });
+        } catch (IOException e) {
+            log.error("Failed to walk directory for S3 upload: {}", sourceFolder, e);
+            throw new StorageException("Failed to upload directory to S3", e);
+        }
+    }
+
     public InputStream downloadFile(String key) {
         log.info("Downloading file from S3: {}/{}", bucketName, key);
         try {
@@ -97,5 +123,13 @@ public class S3Service {
             log.error("Failed to delete file from S3: {}/{}", bucketName, key, e);
             throw new StorageException("S3 deletion failed for key: " + key, e);
         }
+    }
+
+    public String generateSourceKey(UUID projectId, UUID deploymentId) {
+        return String.format(SOURCE_KEY_PATTERN, projectId, deploymentId);
+    }
+
+    public String generateArtifactsKey(UUID projectId, UUID deploymentId) {
+        return String.format(ARTIFACTS_KEY_PATTERN, projectId, deploymentId);
     }
 }

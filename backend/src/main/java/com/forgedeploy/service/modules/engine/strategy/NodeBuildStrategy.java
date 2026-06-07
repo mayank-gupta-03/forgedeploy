@@ -20,4 +20,9 @@ public class NodeBuildStrategy implements BuildStrategy {
     public String getDefaultBuildCommand() {
         return "npm clean install && npm run build";
     }
+
+    @Override
+    public String getDefaultOutputDirectory() {
+        return "dist";
+    }
 }

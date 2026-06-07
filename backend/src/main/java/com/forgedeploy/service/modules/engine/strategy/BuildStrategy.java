@@ -8,4 +8,6 @@ public interface BuildStrategy {
     String getDefaultImage();
 
     String getDefaultBuildCommand();
+
+    String getDefaultOutputDirectory();
 }
