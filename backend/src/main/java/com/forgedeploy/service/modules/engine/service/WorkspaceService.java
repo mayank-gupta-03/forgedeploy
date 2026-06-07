@@ -43,7 +43,7 @@ public class WorkspaceService {
         try {
             if (Files.exists(workspacePath)) {
                 log.debug("Workspace already exists, clearing it: {}", workspacePath);
-                deleteDirectory(workspacePath);
+                deleteDirectory(deploymentId);
             }
             Files.createDirectories(workspacePath);
             return workspacePath;
@@ -53,7 +53,8 @@ public class WorkspaceService {
         }
     }
 
-    private void deleteDirectory(Path pathToBeDeleted) {
+    public void deleteDirectory(UUID deploymentId) {
+        Path pathToBeDeleted = getWorkspacePath(deploymentId);
         log.debug("Deleting directory: {}", pathToBeDeleted);
         try (Stream<Path> stream = Files.walk(pathToBeDeleted)) {
             stream.sorted(Comparator.reverseOrder()).forEach(path -> {

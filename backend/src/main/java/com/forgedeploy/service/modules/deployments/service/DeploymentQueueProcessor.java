@@ -5,6 +5,8 @@ import com.forgedeploy.service.entities.DeploymentStatus;
 import com.forgedeploy.service.modules.deployments.repository.DeploymentRepository;
 import com.forgedeploy.service.modules.engine.service.BuildService;
 import com.forgedeploy.service.modules.engine.service.WorkspaceService;
+import com.forgedeploy.service.modules.engine.strategy.BuildStrategy;
+import com.forgedeploy.service.modules.engine.strategy.BuildStrategyFactory;
 import com.forgedeploy.service.modules.s3.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ public class DeploymentQueueProcessor {
     private final S3Service s3Service;
     private final WorkspaceService workspaceService;
     private final BuildService buildService;
+    private final BuildStrategyFactory strategyFactory;
 
     @Scheduled(fixedDelay = 5000)
     public void processQueue() {
@@ -66,7 +69,6 @@ public class DeploymentQueueProcessor {
             Path zipFilePath = workspaceService.saveToWorkspace(deployment.getId(), file);
             extractZip(zipFilePath);
 
-            // Update status to BUILDING
             deployment.setStatus(DeploymentStatus.BUILDING);
             deploymentRepository.save(deployment);
 
@@ -75,9 +77,22 @@ public class DeploymentQueueProcessor {
 
             log.info("Build finished successfully for deployment: {}", deployment.getId());
 
-            // Transition to COMPLETED (later this will be UPLOADING_ARTIFACTS)
+            deployment.setStatus(DeploymentStatus.UPLOADING);
+            deploymentRepository.save(deployment);
+            deployment.setErrorMessage(null);
+
+            BuildStrategy strategy = strategyFactory.getStrategy(deployment.getProjectType());
+            String outputDir = (deployment.getOutputDirectory() == null || deployment.getOutputDirectory().isBlank())
+                    ? strategy.getDefaultOutputDirectory()
+                    : deployment.getOutputDirectory();
+
+            Path localDirPath = workspaceService.getWorkspacePath(deployment.getId()).resolve(outputDir);
+            String s3Prefix = s3Service.generateArtifactsKey(deployment.getProject().getId(), deployment.getId());
+
+            s3Service.uploadDirectory(s3Prefix, localDirPath);
+            workspaceService.deleteDirectory(deployment.getId());
+
             deployment.setStatus(DeploymentStatus.COMPLETED);
-            deployment.setErrorMessage(null); // Clear any previous error
             deploymentRepository.save(deployment);
 
         } catch (Exception e) {

@@ -47,7 +47,7 @@ public class DeploymentService {
 
         deploymentRepository.save(deployment);
 
-        String key = "projects/" + project.getId() + "/deployments/" + deployment.getId() + "/source.zip";
+        String key = s3Service.generateSourceKey(project.getId(), deployment.getId());
 
         if (SourceType.ZIP.equals(request.getSourceType())) {
             if (file == null || file.isEmpty()) {
