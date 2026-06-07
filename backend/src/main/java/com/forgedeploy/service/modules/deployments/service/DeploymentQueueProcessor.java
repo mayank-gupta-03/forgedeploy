@@ -3,6 +3,7 @@ package com.forgedeploy.service.modules.deployments.service;
 import com.forgedeploy.service.entities.Deployment;
 import com.forgedeploy.service.entities.DeploymentStatus;
 import com.forgedeploy.service.modules.deployments.repository.DeploymentRepository;
+import com.forgedeploy.service.modules.engine.service.BuildService;
 import com.forgedeploy.service.modules.engine.service.WorkspaceService;
 import com.forgedeploy.service.modules.s3.service.S3Service;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class DeploymentQueueProcessor {
     private final DeploymentRepository deploymentRepository;
     private final S3Service s3Service;
     private final WorkspaceService workspaceService;
+    private final BuildService buildService;
 
     @Scheduled(fixedDelay = 5000)
     public void processQueue() {
@@ -64,9 +66,16 @@ public class DeploymentQueueProcessor {
             Path zipFilePath = workspaceService.saveToWorkspace(deployment.getId(), file);
             extractZip(zipFilePath);
 
-            log.info("Mock build finished for deployment: {}", deployment.getId());
+            // Update status to BUILDING
+            deployment.setStatus(DeploymentStatus.BUILDING);
+            deploymentRepository.save(deployment);
 
-            // In Phase 2, this will be replaced with actual build/docker logic
+            log.info("Starting Docker build for deployment: {}", deployment.getId());
+            buildService.orchestrateBuild(deployment);
+
+            log.info("Build finished successfully for deployment: {}", deployment.getId());
+
+            // Transition to COMPLETED (later this will be UPLOADING_ARTIFACTS)
             deployment.setStatus(DeploymentStatus.COMPLETED);
             deploymentRepository.save(deployment);
 
