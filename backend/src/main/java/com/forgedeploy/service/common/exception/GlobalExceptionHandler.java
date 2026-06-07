@@ -46,4 +46,43 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errors);
     }
 
+    @ExceptionHandler(DeploymentNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleDeploymentNotFoundException(DeploymentNotFoundException ex) {
+        log.warn("Deployment not found: {}", ex.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errors);
+    }
+
+    @ExceptionHandler(BuildFailedException.class)
+    public ResponseEntity<Map<String, String>> handleBuildFailedException(BuildFailedException ex) {
+        log.error("Build failed: {}", ex.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errors);
+    }
+
+    @ExceptionHandler(StorageException.class)
+    public ResponseEntity<Map<String, String>> handleStorageException(StorageException ex) {
+        log.error("Storage error: {}", ex.getMessage(), ex);
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "A storage error occurred: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
+    }
+
+    @ExceptionHandler(WorkspaceException.class)
+    public ResponseEntity<Map<String, String>> handleWorkspaceException(WorkspaceException ex) {
+        log.error("Workspace error: {}", ex.getMessage(), ex);
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "A workspace error occurred");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
+        log.error("Unexpected error occurred", ex);
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "An unexpected error occurred. Please try again later.");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
+    }
 }

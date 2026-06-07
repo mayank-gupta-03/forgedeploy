@@ -9,6 +9,7 @@ CREATE TABLE deployments (
     output_directory VARCHAR(255),
     status VARCHAR(50) NOT NULL,
     log_path VARCHAR(255),
+    error_message TEXT,
     build_duration BIGINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

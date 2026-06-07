@@ -1,5 +1,6 @@
 package com.forgedeploy.service.modules.engine.service;
 
+import com.forgedeploy.service.common.exception.WorkspaceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -22,12 +23,13 @@ public class WorkspaceService {
         Path workspace = createWorkspace(deploymentId);
         Path targetFilePath = workspace.resolve("source.zip");
 
+        log.info("Saving source ZIP to workspace: {}", targetFilePath);
         try {
             Files.copy(inputStream, targetFilePath, StandardCopyOption.REPLACE_EXISTING);
             return targetFilePath;
         } catch (IOException e) {
             log.error("Failed to save input stream to workspace for deployment: {}", deploymentId, e);
-            throw new RuntimeException("Failed to store file in workspace", e);
+            throw new WorkspaceException("Failed to store file in workspace", e);
         }
     }
 
@@ -36,30 +38,35 @@ public class WorkspaceService {
     }
 
     private Path createWorkspace(UUID deploymentId) {
-        Path workspacePath = Paths.get(BASE_PATH, deploymentId.toString());
+        Path workspacePath = getWorkspacePath(deploymentId);
+        log.info("Creating workspace directory: {}", workspacePath);
         try {
             if (Files.exists(workspacePath)) {
+                log.debug("Workspace already exists, clearing it: {}", workspacePath);
                 deleteDirectory(workspacePath);
             }
             Files.createDirectories(workspacePath);
             return workspacePath;
         } catch (IOException e) {
             log.error("Failed to create directories for deployment: {}", deploymentId, e);
-            throw new RuntimeException("Could not initialize workspace storage", e);
+            throw new WorkspaceException("Could not initialize workspace storage", e);
         }
     }
 
     private void deleteDirectory(Path pathToBeDeleted) {
+        log.debug("Deleting directory: {}", pathToBeDeleted);
         try (Stream<Path> stream = Files.walk(pathToBeDeleted)) {
             stream.sorted(Comparator.reverseOrder()).forEach(path -> {
                 try {
                     Files.delete(path);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    log.error("Failed to delete path: {}", path, e);
+                    throw new WorkspaceException("Failed to clear workspace path: " + path, e);
                 }
             });
         } catch (IOException e) {
-            throw new RuntimeException("Failed to clear workspace", e);
+            log.error("Failed to walk directory for deletion: {}", pathToBeDeleted, e);
+            throw new WorkspaceException("Failed to clear workspace", e);
         }
     }
 }

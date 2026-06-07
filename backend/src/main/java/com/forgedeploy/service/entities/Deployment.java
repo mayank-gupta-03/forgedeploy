@@ -54,6 +54,9 @@ public class Deployment {
     @Column(name = "log_path")
     private String logPath;
 
+    @Column(name = "error_message")
+    private String errorMessage;
+
     @Column(name = "build_duration")
     private Long buildDuration;
 

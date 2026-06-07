@@ -1,6 +1,8 @@
 package com.forgedeploy.service.modules.deployments.service;
 
+import com.forgedeploy.service.common.exception.DeploymentNotFoundException;
 import com.forgedeploy.service.common.exception.ProjectNotFoundException;
+import com.forgedeploy.service.common.exception.StorageException;
 import com.forgedeploy.service.entities.SourceType;
 import com.forgedeploy.service.entities.Deployment;
 import com.forgedeploy.service.entities.DeploymentStatus;
@@ -26,8 +28,6 @@ public class DeploymentService {
     private final DeploymentRepository deploymentRepository;
     private final ProjectRepository projectRepository;
     private final S3Service s3Service;
-
-    private static final String UPLOADS_DIR = "uploads";
 
     @Transactional
     public DeploymentResponse createDeployment(CreateDeploymentRequest request, MultipartFile file, UUID userId) {
@@ -60,19 +60,21 @@ public class DeploymentService {
                 deployment.setStorageKey(key);
             } catch (IOException e) {
                 deployment.setStatus(DeploymentStatus.FAILED);
-                log.error("Deployment failed for project: {}, deployment: {}", project.getId(), deployment.getId(), e);
-                throw new RuntimeException("Failed to deploy the project", e);
+                deployment.setErrorMessage("S3 Upload failed: " + e.getMessage());
+                log.error("Deployment storage failed for project: {}, deployment: {}", project.getId(), deployment.getId(), e);
+                throw new StorageException("Failed to upload source ZIP to storage", e);
             }
         }
 
         deployment = deploymentRepository.save(deployment);
+        log.info("Successfully created deployment: {} for project: {}", deployment.getId(), project.getId());
         return mapToResponse(deployment);
     }
 
     public DeploymentResponse getDeploymentById(UUID id, UUID userId) {
         Deployment deployment = deploymentRepository.findById(id)
                 .filter(d -> d.getProject().getUser().getId().equals(userId))
-                .orElseThrow(() -> new ProjectNotFoundException("Deployment not found or access denied"));
+                .orElseThrow(() -> new DeploymentNotFoundException("Deployment not found or access denied"));
 
         return mapToResponse(deployment);
     }

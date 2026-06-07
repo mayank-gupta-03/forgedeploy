@@ -77,11 +77,13 @@ public class DeploymentQueueProcessor {
 
             // Transition to COMPLETED (later this will be UPLOADING_ARTIFACTS)
             deployment.setStatus(DeploymentStatus.COMPLETED);
+            deployment.setErrorMessage(null); // Clear any previous error
             deploymentRepository.save(deployment);
 
         } catch (Exception e) {
             log.error("Deployment failed: {}", deployment.getId(), e);
             deployment.setStatus(DeploymentStatus.FAILED);
+            deployment.setErrorMessage(e.getMessage());
             deploymentRepository.save(deployment);
         }
     }

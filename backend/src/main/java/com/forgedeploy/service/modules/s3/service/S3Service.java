@@ -1,5 +1,6 @@
 package com.forgedeploy.service.modules.s3.service;
 
+import com.forgedeploy.service.common.exception.StorageException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,24 +34,27 @@ public class S3Service {
             log.info("S3 bucket '{}' created successfully", bucketName);
         } catch (Exception e) {
             log.error("Could not initialize S3 bucket: {}", bucketName, e);
+            throw new StorageException("Failed to initialize S3 storage", e);
         }
     }
 
     public void uploadFile(String key, Path filePath) {
+        log.info("Uploading file to S3: {}/{}", bucketName, key);
         try {
             s3Client.putObject(PutObjectRequest.builder()
                             .bucket(bucketName)
                             .key(key)
                             .build(),
                     filePath);
-            log.info("Uploaded file to S3: {}/{}", bucketName, key);
+            log.info("Successfully uploaded file to S3: {}", key);
         } catch (Exception e) {
             log.error("Failed to upload file to S3: {}/{}", bucketName, key, e);
-            throw new RuntimeException("S3 upload failed", e);
+            throw new StorageException("S3 upload failed for key: " + key, e);
         }
     }
 
     public void uploadInputStream(String key, InputStream inputStream, long contentLength, String contentType) {
+        log.info("Uploading stream to S3: {}/{} ({} bytes)", bucketName, key, contentLength);
         try {
             s3Client.putObject(PutObjectRequest.builder()
                             .bucket(bucketName)
@@ -58,34 +62,40 @@ public class S3Service {
                             .contentType(contentType)
                             .build(),
                     RequestBody.fromInputStream(inputStream, contentLength));
-            log.info("Uploaded stream to S3: {}/{}", bucketName, key);
+            log.info("Successfully uploaded stream to S3: {}", key);
         } catch (Exception e) {
             log.error("Failed to upload stream to S3: {}/{}", bucketName, key, e);
-            throw new RuntimeException("S3 upload failed", e);
+            throw new StorageException("S3 stream upload failed for key: " + key, e);
         }
     }
 
     public InputStream downloadFile(String key) {
+        log.info("Downloading file from S3: {}/{}", bucketName, key);
         try {
             return s3Client.getObject(GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
                     .build());
+        } catch (NoSuchKeyException e) {
+            log.error("File not found in S3: {}/{}", bucketName, key);
+            throw new StorageException("File not found in storage: " + key, e);
         } catch (Exception e) {
             log.error("Failed to download file from S3: {}/{}", bucketName, key, e);
-            throw new RuntimeException("S3 download failed", e);
+            throw new StorageException("S3 download failed for key: " + key, e);
         }
     }
 
     public void deleteFile(String key) {
+        log.info("Deleting file from S3: {}/{}", bucketName, key);
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
                     .build());
-            log.info("Deleted file from S3: {}/{}", bucketName, key);
+            log.info("Successfully deleted file from S3: {}", key);
         } catch (Exception e) {
             log.error("Failed to delete file from S3: {}/{}", bucketName, key, e);
+            throw new StorageException("S3 deletion failed for key: " + key, e);
         }
     }
 }
