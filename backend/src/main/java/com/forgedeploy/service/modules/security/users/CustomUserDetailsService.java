@@ -1,7 +1,7 @@
 package com.forgedeploy.service.modules.security.users;
 
-import com.forgedeploy.service.modules.users.repositories.UserRepository;
 import com.forgedeploy.service.modules.security.principal.UserPrincipal;
+import com.forgedeploy.service.modules.users.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
