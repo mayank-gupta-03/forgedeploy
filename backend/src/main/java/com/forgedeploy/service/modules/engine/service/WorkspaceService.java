@@ -31,6 +31,10 @@ public class WorkspaceService {
         }
     }
 
+    public Path getWorkspacePath(UUID deploymentId) {
+        return Paths.get(BASE_PATH, deploymentId.toString());
+    }
+
     private Path createWorkspace(UUID deploymentId) {
         Path workspacePath = Paths.get(BASE_PATH, deploymentId.toString());
         try {

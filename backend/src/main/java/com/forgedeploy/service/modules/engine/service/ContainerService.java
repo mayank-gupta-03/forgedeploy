@@ -40,7 +40,7 @@ public class ContainerService {
 
         String[] imageParts = imageName.split(":");
         String repository = imageParts[0];
-        String tag = imageParts[1];
+        String tag = (imageParts.length > 1 && !imageParts[1].isBlank()) ? imageParts[1] : "latest";
 
         dockerClient.pullImageCmd(repository).withTag(tag).start().awaitCompletion();
         log.info("Successfully pulled image: {}", imageName);
