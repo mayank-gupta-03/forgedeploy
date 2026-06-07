@@ -9,8 +9,8 @@ ForgeDeploy is a Vercel-like platform for deploying web applications. This plan 
 
 ## Phase 2: Build Engine (Isolation & Execution) - IN PROGRESS
 - [x] **2.1 Workspace Management:** Logic to create temporary directories and extract source code.
-- [ ] **2.2 Docker Build Runner (Next):** Implementing containerized builds using Docker API.
-- [ ] **2.3 Artifact Extraction:** Extracting and uploading build output (e.g., `dist/`) to MinIO.
+- [x] **2.2 Docker Build Runner:** Implementing containerized builds using Docker API.
+- [ ] **2.3 Artifact Extraction (Next):** Extracting and uploading build output (e.g., `dist/`) to MinIO.
 
 ## Phase 3: Dynamic Serving (Infrastructure)
 - [ ] **3.1 Nginx Dynamic Proxy:** Wildcard subdomain handling (`*.localhost`).
