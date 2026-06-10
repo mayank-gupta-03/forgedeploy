@@ -18,8 +18,9 @@ public class NodeBuildStrategy implements BuildStrategy {
 
     @Override
     public String getDefaultBuildCommand() {
-        return "npm clean install && npm run build";
+        return "npm ci && npm run build";
     }
+
 
     @Override
     public String getDefaultOutputDirectory() {

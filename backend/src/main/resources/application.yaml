@@ -20,6 +20,11 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
 jwt:
   secret: 048e51adcecaef206bdb0b11a8af5f7baef79cbf580dcf3030b8bbf33aa091b4
 

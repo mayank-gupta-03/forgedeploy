@@ -43,6 +43,32 @@ public class S3Service {
             log.error("Could not initialize S3 bucket: {}", bucketName, e);
             throw new StorageException("Failed to initialize S3 storage", e);
         }
+        setBucketPublic();
+    }
+
+    private void setBucketPublic() {
+        String policy = "{\n" +
+                "  \"Version\": \"2012-10-17\",\n" +
+                "  \"Statement\": [\n" +
+                "    {\n" +
+                "      \"Sid\": \"PublicRead\",\n" +
+                "      \"Effect\": \"Allow\",\n" +
+                "      \"Principal\": \"*\",\n" +
+                "      \"Action\": [\"s3:GetObject\"],\n" +
+                "      \"Resource\": [\"arn:aws:s3:::" + bucketName + "/*\"]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        try {
+            s3Client.putBucketPolicy(PutBucketPolicyRequest.builder()
+                    .bucket(bucketName)
+                    .policy(policy)
+                    .build());
+            log.info("Successfully set public read-only policy for bucket: {}", bucketName);
+        } catch (Exception e) {
+            log.error("Failed to set bucket policy: {}", bucketName, e);
+        }
     }
 
     public void uploadFile(String key, Path filePath) {
