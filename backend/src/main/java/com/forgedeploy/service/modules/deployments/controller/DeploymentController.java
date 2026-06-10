@@ -23,7 +23,7 @@ public class DeploymentController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DeploymentResponse> createDeployment(
-            @Valid @RequestPart("request") CreateDeploymentRequest request,
+            @Valid @ModelAttribute CreateDeploymentRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)

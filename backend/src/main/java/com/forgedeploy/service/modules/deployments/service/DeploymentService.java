@@ -35,11 +35,17 @@ public class DeploymentService {
                 .filter(p -> p.getUser().getId().equals(userId))
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found or access denied"));
 
+        // Determine repoUrl before building the entity
+        String repoUrl = request.getRepoUrl();
+        if (SourceType.ZIP.equals(request.getSourceType())) {
+            repoUrl = "local-zip";
+        }
+
         Deployment deployment = Deployment.builder()
                 .project(project)
                 .sourceType(request.getSourceType())
                 .projectType(request.getProjectType())
-                .repoUrl(request.getRepoUrl())
+                .repoUrl(repoUrl)
                 .buildCommand(request.getBuildCommand() != null ? request.getBuildCommand() : null)
                 .outputDirectory(request.getOutputDirectory() != null ? request.getOutputDirectory() : null)
                 .status(DeploymentStatus.QUEUED)
@@ -53,7 +59,6 @@ public class DeploymentService {
             if (file == null || file.isEmpty()) {
                 throw new IllegalArgumentException("ZIP file is required when source type is ZIP");
             }
-            deployment.setRepoUrl("local-zip");
 
             try {
                 uploadZipToS3(file, key);
