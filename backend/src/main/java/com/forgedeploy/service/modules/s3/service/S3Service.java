@@ -47,10 +47,21 @@ public class S3Service {
 
     public void uploadFile(String key, Path filePath) {
         log.info("Uploading file to S3: {}/{}", bucketName, key);
+        String mimeType = null;
+        try {
+            mimeType = Files.probeContentType(filePath);
+
+            if (mimeType == null || mimeType.isBlank()) {
+                mimeType = getFallbackMimeType(filePath.toString());
+            }
+        } catch (IOException e) {
+            throw new StorageException("Unable to determine MIME type for key: " + key, e);
+        }
         try {
             s3Client.putObject(PutObjectRequest.builder()
                             .bucket(bucketName)
                             .key(key)
+                            .contentType(mimeType)
                             .build(),
                     filePath);
             log.info("Successfully uploaded file to S3: {}", key);
@@ -131,5 +142,21 @@ public class S3Service {
 
     public String generateArtifactsKey(UUID projectId, UUID deploymentId) {
         return String.format(ARTIFACTS_KEY_PATTERN, projectId, deploymentId);
+    }
+
+    private String getFallbackMimeType(String path) {
+        String lowerFilename = path.toLowerCase();
+
+        if (lowerFilename.endsWith(".html") || lowerFilename.endsWith(".htm")) {
+            return "text/html";
+        } else if (lowerFilename.endsWith(".css")) {
+            return "text/css";
+        } else if (lowerFilename.endsWith(".js")) {
+            return "application/javascript";
+        } else if (lowerFilename.endsWith(".svg")) {
+            return "image/svg+xml";
+        }
+
+        return "application/octet-stream";
     }
 }

@@ -7,14 +7,14 @@ ForgeDeploy is a Vercel-like platform for deploying web applications. This plan 
 - [x] **1.2 Job Repository Refinement:** Updated `Deployment` entity with granular statuses and log paths.
 - [x] **1.3 Async Job Processor:** Implemented `@Scheduled` polling and `@Async` worker thread pool.
 
-## Phase 2: Build Engine (Isolation & Execution) - IN PROGRESS
+## Phase 2: Build Engine (Isolation & Execution) - COMPLETED
 - [x] **2.1 Workspace Management:** Logic to create temporary directories and extract source code.
 - [x] **2.2 Docker Build Runner:** Implementing containerized builds using Docker API.
-- [ ] **2.3 Artifact Extraction (Next):** Extracting and uploading build output (e.g., `dist/`) to MinIO.
+- [x] **2.3 Artifact Extraction:** Extracting and uploading build output (e.g., `dist/`) to MinIO.
 
-## Phase 3: Dynamic Serving (Infrastructure)
-- [ ] **3.1 Nginx Dynamic Proxy:** Wildcard subdomain handling (`*.localhost`).
-- [ ] **3.2 Routing Logic:** Subdomain to deployment artifact mapping.
+## Phase 3: Dynamic Serving (Infrastructure) - COMPLETED
+- [x] **3.1 Nginx Dynamic Proxy:** Wildcard subdomain handling (`*.localhost`).
+- [x] **3.2 Routing Logic:** Subdomain to deployment artifact mapping.
 
 ## Phase 4: GitHub Integration
 - [ ] **4.1 GitHub OAuth:** User account linking.
