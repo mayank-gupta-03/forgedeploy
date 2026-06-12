@@ -22,13 +22,11 @@ import java.util.stream.Stream;
 @Slf4j
 public class S3Service {
 
-    private final S3Client s3Client;
-
-    @Value("${storage.s3.bucket-name}")
-    private String bucketName;
-
     private static final String SOURCE_KEY_PATTERN = "projects/%s/deployments/%s/source.zip";
     private static final String ARTIFACTS_KEY_PATTERN = "projects/%s/deployments/%s/artifacts/";
+    private final S3Client s3Client;
+    @Value("${storage.s3.bucket-name}")
+    private String bucketName;
 
     @PostConstruct
     public void init() {
