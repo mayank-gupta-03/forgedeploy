@@ -1,5 +1,6 @@
 package com.forgedeploy.service.modules.projects.service;
 
+import com.forgedeploy.service.common.exception.ProjectAlreadyExistsException;
 import com.forgedeploy.service.common.exception.ProjectNotFoundException;
 import com.forgedeploy.service.entities.Project;
 import com.forgedeploy.service.entities.UserInfo;
@@ -24,6 +25,10 @@ public class ProjectService {
     public ProjectResponse createProject(CreateProjectRequest request, UUID userId) {
         UserInfo user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+
+        if (projectRepository.findByName(request.getName()).isPresent()) {
+            throw new ProjectAlreadyExistsException("Found another project with the same name.");
+        }
 
         Project project = Project.builder()
                 .name(request.getName())

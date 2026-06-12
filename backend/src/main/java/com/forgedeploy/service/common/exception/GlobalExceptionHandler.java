@@ -78,6 +78,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
     }
 
+    @ExceptionHandler(ProjectAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleProjectAlreadyExistsException(ProjectAlreadyExistsException ex) {
+        log.error("Project already exists: {}", ex.getMessage(), ex);
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Found another project with the same name.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errors);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
         log.error("Unexpected error occurred", ex);
