@@ -2,6 +2,23 @@ spring:
   application:
     name: service
 
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: Ov23liTvuG54hYZWUVZu
+            client-secret: 35cac856926a012e120ba99f1ad2246c415eb1a5
+            scope: read:user
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            client-name: GitHub
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login
+
   datasource:
     url: jdbc:postgresql://localhost:5432/forge-deploy-service
     username: forge_user
