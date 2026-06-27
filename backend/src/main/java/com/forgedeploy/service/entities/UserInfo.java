@@ -22,6 +22,15 @@ public class UserInfo {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
+
+    @Column(name = "github_id")
+    private String githubId;
+
+    @Column(name = "github_username")
+    private String githubUsername;
+
+    @Column(name = "github_access_token")
+    private String githubAccessToken;
 }
