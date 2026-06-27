@@ -1,4 +1,4 @@
-package com.forgedeploy.service.modules.security.users;
+package com.forgedeploy.service.modules.security.service;
 
 import com.forgedeploy.service.modules.security.principal.UserPrincipal;
 import com.forgedeploy.service.modules.users.repositories.UserRepository;
