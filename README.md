@@ -6,22 +6,22 @@ ForgeDeploy is a containerized, self-hosted deployment platform (inspired by Ver
 
 ## 🏗️ Tech Stack
 
-- **Backend:** Spring Boot 4.0.6, Java 25, Spring Security (JWT-based), Flyway, Spring Data JPA.
-- **Database:** PostgreSQL (user, project, and deployment/job persistence).
-- **Object Storage:** MinIO (S3-compatible object storage for source ZIPs and static artifacts).
+- **Backend:** Spring Boot 4.0.6, Java 25, Spring Security (JWT & GitHub OAuth2), Flyway, Spring Data JPA.
+- **Database:** PostgreSQL (persistent storage for users, projects, and deployments).
+- **Object Storage:** MinIO (S3-compatible storage for source ZIPs and compiled static assets).
 - **Reverse Proxy / Serving:** Nginx (handles wildcard subdomain routing and SPA fallbacks).
-- **Build Isolation:** Docker API (runs build commands in isolated, ephemeral containers).
+- **Build Isolation:** Docker API (executes builds inside isolated, ephemeral container environments).
 
 ---
 
 ## ⚡ Key Features (Built & Verified)
 
-1. **Authentication & Authorization:** Secure JWT-based authentication for user registration and logins.
-2. **Project & Workspace Management:** CRUD APIs to manage user projects and ephemeral directories that automatically clean up after builds.
+1. **Authentication & Authorization:** Dual authentication support via standard JWT login/registration endpoints and modern GitHub OAuth2 client integration.
+2. **Project & Workspace Management:** Secure CRUD APIs for user projects with local workspace directories that clean up automatically when builds finish.
 3. **Containerized Build Engine:** 
-   - Supports **Node.js** projects (uses `node:20-alpine`, installs dependencies with `npm ci`, and builds).
+   - Supports **Node.js** projects (uses `node:20-alpine`, runs `npm ci` and builds assets).
    - Supports **Java/Maven** projects (uses `maven:3.9.16-eclipse-temurin-25-alpine` and packages apps with `mvn clean package -DskipTests`).
-4. **Automated Serving Infrastructure:** Nginx maps requests to `http://{projectId}--{deploymentId}.localhost` and fetches static assets directly from MinIO with automatic MIME type detection and Single Page Application (SPA) fallback routing.
+4. **Automated Serving Infrastructure:** Nginx maps incoming requests dynamically to `http://{projectId}--{deploymentId}.localhost` and proxies to MinIO with correct MIME type detection and Single Page Application (SPA) fallback routing.
 
 ---
 
@@ -53,11 +53,11 @@ Make sure you have the following installed on your machine:
 ---
 
 ### Step 1: Start the Infrastructure
-Use Docker Compose to launch PostgreSQL, MinIO, and Nginx in the background:
+To start the database, S3 storage, and Nginx reverse proxy, run:
 ```bash
-docker compose up -d
+docker compose up -d forgedeploy-db forge-minio forgedeploy-nginx
 ```
-> **Note:** The `forgedeploy-service` is defined in `docker-compose.yml` but remains commented out. This configuration allows you to run and debug the Spring Boot backend directly from your IDE or host system during development.
+> **Note:** The `forgedeploy-service` is also defined in `docker-compose.yml` to run the fully containerized backend. However, starting only the database, storage, and proxy containers allows you to run and debug the Spring Boot backend directly from your host system or IDE during development.
 
 ---
 
@@ -129,9 +129,22 @@ Nginx automatically resolves this pattern and routes the request to serve the co
 
 ---
 
-## 🗺️ Roadmap & Next Steps
+## 🗺️ Roadmap & Short-Term TODOs
 
-Please refer to the updated implementation checklist in [.gemini/PLAN.md](file:///Users/mayankgupta/dev/forgedeploy/.gemini/PLAN.md) to track completed phases and future goals, including:
-- **Phase 4:** GitHub Integration (OAuth, Repo browsing, Webhook triggers)
-- **Phase 5:** React/TypeScript Web Dashboard (Authentication, real-time log viewers)
-- **Phase 6:** Advanced features (custom domains, environment secret injection, and build container resource limits)
+Please refer to the detailed implementation checklist in [.gemini/PLAN.md](file:///Users/mayankgupta/dev/forgedeploy/.gemini/PLAN.md) to track high-level roadmap items. 
+
+### 📝 Short-Term TODOs
+
+#### Phase 4: GitHub Integration
+- [ ] Implement GitHub repository list & branch fetching using stored user OAuth tokens
+- [ ] Add webhook endpoint to trigger automatic redeployment on git push
+
+#### Phase 5: Dashboard UI
+- [ ] Initialize React/TypeScript dashboard project in the `frontend` folder
+- [ ] Build Login/Register screens and Project/Deployment Dashboard
+- [ ] Develop real-time log viewer to stream container build output
+
+#### Phase 6: Reliability & Polish
+- [ ] Support custom domain mapping for deployments
+- [ ] Add build environment variable configuration/secret injection
+- [ ] Set resource constraints (CPU, memory limits) for build Docker containers
