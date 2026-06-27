@@ -7,6 +7,7 @@ ForgeDeploy is a containerized, self-hosted deployment platform (inspired by Ver
 ## 🏗️ Tech Stack
 
 - **Backend:** Spring Boot 4.0.6, Java 25, Spring Security (JWT & GitHub OAuth2), Flyway, Spring Data JPA.
+- **Frontend:** React 19, TypeScript, Tailwind CSS v4, Shadcn UI, Vite.
 - **Database:** PostgreSQL (persistent storage for users, projects, and deployments).
 - **Object Storage:** MinIO (S3-compatible storage for source ZIPs and compiled static assets).
 - **Reverse Proxy / Serving:** Nginx (handles wildcard subdomain routing and SPA fallbacks).
@@ -17,11 +18,12 @@ ForgeDeploy is a containerized, self-hosted deployment platform (inspired by Ver
 ## ⚡ Key Features (Built & Verified)
 
 1. **Authentication & Authorization:** Dual authentication support via standard JWT login/registration endpoints and modern GitHub OAuth2 client integration.
-2. **Project & Workspace Management:** Secure CRUD APIs for user projects with local workspace directories that clean up automatically when builds finish.
-3. **Containerized Build Engine:** 
+2. **React Developer Dashboard:** Premium dark-theme client to register users, manage projects, trigger deployments via ZIP uploads, and track active container builds with live status polling.
+3. **Project & Workspace Management:** Secure CRUD APIs for user projects with local workspace directories that clean up automatically when builds finish.
+4. **Containerized Build Engine:** 
    - Supports **Node.js** projects (uses `node:20-alpine`, runs `npm ci` and builds assets).
    - Supports **Java/Maven** projects (uses `maven:3.9.16-eclipse-temurin-25-alpine` and packages apps with `mvn clean package -DskipTests`).
-4. **Automated Serving Infrastructure:** Nginx maps incoming requests dynamically to `http://{projectId}--{deploymentId}.localhost` and proxies to MinIO with correct MIME type detection and Single Page Application (SPA) fallback routing.
+5. **Automated Serving Infrastructure:** Nginx maps incoming requests dynamically to `http://{projectId}--{deploymentId}.localhost` and proxies to MinIO with correct MIME type detection and Single Page Application (SPA) fallback routing.
 
 ---
 
@@ -32,6 +34,9 @@ ForgeDeploy is a containerized, self-hosted deployment platform (inspired by Ver
 ├── backend/               # Spring Boot 4.0.6 / Java 25 Service
 │   ├── src/               # Application source code
 │   └── pom.xml            # Maven project descriptor
+├── frontend/              # React 19 / TypeScript Developer Dashboard
+│   ├── src/               # React client components, pages, and services
+│   └── package.json       # Frontend dependencies and dev scripts
 ├── nginx/                 # Serving configuration
 │   └── nginx.conf         # Wildcard reverse proxy rules
 ├── docker-compose.yml     # Local database, object storage, and reverse proxy definition
@@ -69,6 +74,17 @@ cd backend
 ```
 
 Once running, the application will initialize the S3 bucket policies and run migrations via Flyway. The service will be available at `http://localhost:8080`.
+
+---
+
+### Step 2.5: Start the Frontend Dashboard
+Navigate to the `frontend` directory and start the developer console:
+```bash
+cd frontend
+npm run dev
+```
+
+The React dashboard will boot on `http://localhost:3000`. You can register an account, log in, or continue with GitHub OAuth.
 
 ---
 
@@ -138,11 +154,6 @@ Please refer to the detailed implementation checklist in [.gemini/PLAN.md](file:
 #### Phase 4: GitHub Integration
 - [ ] Implement GitHub repository list & branch fetching using stored user OAuth tokens
 - [ ] Add webhook endpoint to trigger automatic redeployment on git push
-
-#### Phase 5: Dashboard UI
-- [ ] Initialize React/TypeScript dashboard project in the `frontend` folder
-- [ ] Build Login/Register screens and Project/Deployment Dashboard
-- [ ] Develop real-time log viewer to stream container build output
 
 #### Phase 6: Reliability & Polish
 - [ ] Support custom domain mapping for deployments
